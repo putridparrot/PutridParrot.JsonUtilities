@@ -1,0 +1,34 @@
+name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.401
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+    - name: Create Package
+      run: dotnet pack --configuration Release
+#    - name: Publish to Nuget
+#      run: dotnet nuget push /home/runner/work/PutridParrot.JsonUtilities/PutridParrot.JsonUtilities/PutridParrot.JsonUtilities/bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+    - name: Publish to GitHub
+      run: |
+        dotnet nuget add source https://nuget.pkg.github.com/putridparrot/index.json -n github -u putridparrot -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+        dotnet nuget push /home/runner/work/PutridParrot.JsonUtilities/PutridParrot.JsonUtilities/PutridParrot.JsonUtilities/bin/Release/*.nupkg --skip-duplicate --api-key ${{secrets.GITHUB_TOKEN}} --source "github"
+      
