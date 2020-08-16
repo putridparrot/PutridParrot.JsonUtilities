@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30406.217
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PutridParrot.JsonUtilities", "PutridParrot.JsonUtilities\PutridParrot.JsonUtilities.csproj", "{5F168F41-EF8A-40D7-B4CE-C842753D8D81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.PutridParrot.JsonUtilities", "Tests.PutridParrot.JsonUtilities\Tests.PutridParrot.JsonUtilities.csproj", "{EBB0F86A-8E30-42B7-A144-8D3BD81982A4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F168F41-EF8A-40D7-B4CE-C842753D8D81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F168F41-EF8A-40D7-B4CE-C842753D8D81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F168F41-EF8A-40D7-B4CE-C842753D8D81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F168F41-EF8A-40D7-B4CE-C842753D8D81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBB0F86A-8E30-42B7-A144-8D3BD81982A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBB0F86A-8E30-42B7-A144-8D3BD81982A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBB0F86A-8E30-42B7-A144-8D3BD81982A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBB0F86A-8E30-42B7-A144-8D3BD81982A4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D7CE57F2-806F-431A-BAEC-3616C92051F5}
+	EndGlobalSection
+EndGlobal
