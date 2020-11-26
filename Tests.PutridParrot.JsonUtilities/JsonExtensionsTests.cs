@@ -7,7 +7,7 @@ namespace Tests.PutridParrot.JsonUtilities
     public class JsonExtensionTests
     {
         private const string Sample1 =
-            "{firstName: \"Scooby\", lastName: \"Doo\",\"friends\": { \"firstName\": \"Shaggy\" }}";
+            "{firstName: \"Scooby\", lastName: \"Doo\",\"friend\": { \"firstName\": \"Shaggy\" }}";
 
         [Test]
         public void Copy_TopLevelProperties()
@@ -18,7 +18,7 @@ namespace Tests.PutridParrot.JsonUtilities
 
             Assert.AreEqual("Scooby", copy.SelectToken("$.firstName")?.Value<string>());
             Assert.AreEqual("Doo", copy.SelectToken("$.lastName")?.Value<string>());
-            Assert.IsNull(copy.SelectToken("$.friends"));
+            Assert.IsNull(copy.SelectToken("$.friend"));
         }
 
         [Test]
@@ -26,9 +26,9 @@ namespace Tests.PutridParrot.JsonUtilities
         {
             var jo = JObject.Parse(Sample1);
 
-            var copy = jo.Copy("friends");
+            var copy = jo.Copy("friend");
 
-            Assert.AreEqual("Shaggy", copy.SelectToken("$.friends.firstName")?.Value<string>());
+            Assert.AreEqual("Shaggy", copy.SelectToken("$.friend.firstName")?.Value<string>());
             Assert.IsNull(copy.SelectToken("$.firstName"));
             Assert.IsNull(copy.SelectToken("$.lastName"));
         }
@@ -36,13 +36,13 @@ namespace Tests.PutridParrot.JsonUtilities
         [Test, Ignore("Ideas under development")]
         public void Copy_NestedProperties()
         {
-            var jo = JObject.Parse("{\"friends.firstName\":\"Shaggy\"}");
+            var jo = JObject.Parse("{\"friend.firstName\":\"Shaggy\"}");
 
             //var jo = JObject.Parse(Sample1);
 
             var copy = jo.Copy("friends.firstName");
 
-            Assert.AreEqual("Shaggy", copy.SelectToken("$.['friends.firstName']")?.Value<string>());
+            Assert.AreEqual("Shaggy", copy.SelectToken("$.['friend.firstName']")?.Value<string>());
             Assert.IsNull(copy.SelectToken("$.firstName"));
             Assert.IsNull(copy.SelectToken("$.lastName"));
         }

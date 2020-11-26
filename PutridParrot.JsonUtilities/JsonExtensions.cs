@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace PutridParrot.JsonUtilities
@@ -13,27 +15,51 @@ namespace PutridParrot.JsonUtilities
             {
                 if (jo.TryGetToken(property, out var token))
                 {
-                    result.Add(new JProperty(FlattenProperty(property), token.DeepClone()));
+                    result.Add(new JProperty(FlattenPath(property), token.DeepClone()));
                 }
             }
             return result;
         }
 
-        private static string FlattenProperty(string property)
+        public static string RemovePathPrefix(string path)
         {
-            var normalised = property;
+            var normalised = path;
             if (normalised.StartsWith("$."))
             {
                 normalised = normalised.Substring(2);
             }
 
+            return normalised;
+        }
+
+        public static bool IsCompositePath(string path)
+        {
+            var normalised = RemovePathPrefix(path);
+            return normalised.Contains('.');
+        }
+
+        public static string FlattenPath(string property, string separator = "")
+        {
+            var normalised = RemovePathPrefix(property);
+
             var split = normalised.Split('.');
             if (split.Length > 1)
             {
-                return String.Join("_", split);
+                var sb = new StringBuilder(split[0]);
+                for (var i = 1; i < split.Length; i++)
+                {
+                    sb.Append(MakeFirstCharUppercase(split[i]));
+                }
+
+                return sb.ToString();
             }
 
             return normalised;
+        }
+
+        private static string MakeFirstCharUppercase(string path)
+        {
+            return Char.IsLower(path[0]) ? $"{Char.ToUpper(path[0])}{path.Substring(1)}" : path;
         }
 
         public static IList<KeyValuePair<string, object>> GetProperties(this JObject jo)
