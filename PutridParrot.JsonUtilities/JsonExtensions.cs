@@ -9,13 +9,13 @@ namespace PutridParrot.JsonUtilities
     public static class JsonExtensions
     {
         /// <summary>
-        /// Copy properties from JObject jo and create a new
-        /// JObject with just those properties
+        /// Clone the supplied properties from the source 
+        /// onto a new object
         /// </summary>
         /// <param name="source"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static JObject Copy(this JObject source, params string[] properties)
+        public static JObject Clone(this JObject source, params string[] properties)
         {
             var result = new JObject();
             foreach (var property in properties)
@@ -128,16 +128,18 @@ namespace PutridParrot.JsonUtilities
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <param name="propertyName"></param>
-        /// <param name="value"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        public static bool TryGetValue<T>(this JObject source, string propertyName, out T value)
+        public static bool TryGetValue<T>(this JObject source, string propertyName, out T result)
         {
-            value = default;
-            if (source.TryGetToken(propertyName, out var token))
+            result = default;
+            var token = source.SelectToken(propertyName);
+            if (token != null)
             {
-                value = token.Value<T>();
+                result = token.Value<T>();
                 return true;
             }
+
             return false;
         }
 
@@ -193,6 +195,12 @@ namespace PutridParrot.JsonUtilities
             return source.TryAdd(normalised, token);
         }
 
+        /// <summary>
+        /// Try to add or update a property on the source. 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="property"></param>
+        /// <returns></returns>
         public static bool TryAddOrUpdate(this JObject source, JProperty property)
         {
             var normalised = RemovePathPrefix(property.Name);
@@ -233,6 +241,16 @@ namespace PutridParrot.JsonUtilities
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Add or update the source object using the supplied property
+        /// with the value argument
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static JObject AddOrUpdate<T>(this JObject source, string propertyName, T value, JsonMapSettings settings = null)
         {
             var current = settings ?? JsonMapSettings.Default;
@@ -285,16 +303,42 @@ namespace PutridParrot.JsonUtilities
             return source.AddOrUpdate(sourcePath, function(source), settings);
         }
 
+        /// <summary>
+        /// Map the source property to the destination property
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="sourcePath"></param>
+        /// <param name="destinationPath"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static JObject Map(this JObject source, string sourcePath, string destinationPath, JsonMapSettings settings = null)
         {
             return source.Map(sourcePath, source, destinationPath, settings);
         }
 
+        /// <summary>
+        /// Map the source property onto the destination object with the same property name
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="sourcePath"></param>
+        /// <param name="destination"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static JObject Map(this JObject source, string sourcePath, JObject destination, JsonMapSettings settings = null)
         {
             return source.Map(sourcePath, destination, sourcePath, settings);
         }
 
+        /// <summary>
+        /// Map the source property from the source object to the destination property
+        /// on the destination object
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="sourcePath"></param>
+        /// <param name="destination"></param>
+        /// <param name="destinationPath"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static JObject Map(this JObject source, string sourcePath, JObject destination, string destinationPath, JsonMapSettings settings = null)
         {
             var current = settings ?? JsonMapSettings.Default;
@@ -343,6 +387,13 @@ namespace PutridParrot.JsonUtilities
             return source;
         }
 
+        /// <summary>
+        /// If the predicate is true then execute the block of code
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
         public static JObject If(this JObject source, Func<bool> predicate, Action<JObject> block)
         {
             if(predicate())
@@ -352,15 +403,92 @@ namespace PutridParrot.JsonUtilities
             return source;
         }
 
+        /// <summary>
+        /// If the predicate is true then execute the block of code
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
+        public static JObject If(this JObject source, Func<JObject, bool> predicate, Action<JObject> block)
+        {
+            if (predicate(source))
+            {
+                block(source);
+            }
+            return source;
+        }
+
+
+        /// <summary>
+        /// If the property exists then execute the block of code
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
         public static JObject IfExists(this JObject source, string propertyName, Action<JObject> block)
         {
             return source.If(() => source.Exists(propertyName), block);
         }
 
+        /// <summary>
+        /// If the property does not exist then execute the block of code
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
         public static JObject IfNotExists(this JObject source, string propertyName, Action<JObject> block)
         {
             return source.If(() => !source.Exists(propertyName), block);
         }
 
+        /// <summary>
+        /// Removes a selection of properties
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="properties"></param>
+        /// <returns></returns>
+        public static JObject Remove(this JObject source, IEnumerable<string> properties)
+        {
+            foreach(var property in properties)
+            {
+                source.Remove(property);
+            }
+
+            return source;
+        }
+
+        /// <summary>
+        /// Mutates a property
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="mutation"></param>
+        /// <returns></returns>
+        public static JObject Mutate<T>(this JObject source, string propertyName, Func<T, T> mutation)
+        {
+            return source.Mutate<T, T>(propertyName, mutation);
+        }
+
+        /// <summary>
+        /// Mutates a property and can change types
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="mutation"></param>
+        /// <returns></returns>
+        public static JObject Mutate<T, TResult>(this JObject source, string propertyName, Func<T, TResult> mutation)
+        {
+            if(source.TryGetValue<T>(propertyName, out T value))
+            {
+                source.AddOrUpdate(propertyName, mutation(value));
+            }
+            return source;
+        }
     }
 }

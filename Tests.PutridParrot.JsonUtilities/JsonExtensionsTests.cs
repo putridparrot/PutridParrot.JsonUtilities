@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using PutridParrot.JsonUtilities;
+using System;
 
 namespace Tests.PutridParrot.JsonUtilities
 {
@@ -14,7 +15,7 @@ namespace Tests.PutridParrot.JsonUtilities
         {
             var jo = JObject.Parse(Sample1);
 
-            var copy = jo.Copy("firstName", "lastName");
+            var copy = jo.Clone("firstName", "lastName");
 
             Assert.AreEqual("Scooby", copy.SelectToken("$.firstName")?.Value<string>());
             Assert.AreEqual("Doo", copy.SelectToken("$.lastName")?.Value<string>());
@@ -26,7 +27,7 @@ namespace Tests.PutridParrot.JsonUtilities
         {
             var jo = JObject.Parse(Sample1);
 
-            var copy = jo.Copy("friend");
+            var copy = jo.Clone("friend");
 
             Assert.AreEqual("Shaggy", copy.SelectToken("$.friend.firstName")?.Value<string>());
             Assert.IsNull(copy.SelectToken("$.firstName"));
@@ -40,7 +41,7 @@ namespace Tests.PutridParrot.JsonUtilities
 
             //var jo = JObject.Parse(Sample1);
 
-            var copy = jo.Copy("friends.firstName");
+            var copy = jo.Clone("friends.firstName");
 
             Assert.AreEqual("Shaggy", copy.SelectToken("$.['friend.firstName']")?.Value<string>());
             Assert.IsNull(copy.SelectToken("$.firstName"));
@@ -296,5 +297,32 @@ namespace Tests.PutridParrot.JsonUtilities
             Assert.IsNull(jsonObject.SelectToken("$.age")?.Value<int>());
         }
 
+        [Test]
+        public void Remove_EnsureSuppliedPropertiesAreRemoved()
+        {
+            var jsonObject = JObject.Parse(Sample1)
+                .Remove(new[]
+                {
+                    "friend",
+                    "firstName"
+                });
+
+            Assert.IsNull(jsonObject.SelectToken("$.friend")?.Value<string>());
+            Assert.IsNull(jsonObject.SelectToken("$.firstName")?.Value<string>());
+            Assert.IsNotNull(jsonObject.SelectToken("$.lastName")?.Value<string>());
+        }
+
+        [Test]
+        public void Update_TakeExistingDataAndChangeIt()
+        {
+            string trade = "{\"startDate\":\"2012-07-30T19:22:09.1440844Z\"}";
+
+            // note when using strings that look like date/times conversion can be an issue
+            // so here we explcitly convert to DateTime then back to string
+            var jo = JObject.Parse(trade)
+                .Mutate<DateTime, string>("startDate", value => value.ToString("dd-MM-yyyy"));
+
+            Assert.AreEqual("30-07-2012", jo.SelectToken("$.startDate")?.Value<string>());
+        }
     }
 }
