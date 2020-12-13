@@ -8,15 +8,15 @@
     // 5. Map from single item to array
     // 6. Map to join, i.e. map property a & b to c
 
-    public class JsonMapSettings
+    public class JsonOptions
     {
-        public static readonly JsonMapSettings Default = new JsonMapSettings
+        public static readonly JsonOptions Default = new JsonOptions
         {
-            AddPathIfMissing = false,
-            CompositeToSimple = true
+            AddPropertyIfMissing = false,
+            //CompositeToSimple = true
         };
 
-        public bool AddPathIfMissing { get; set; }
-        public bool CompositeToSimple { get; set; }
+        public bool AddPropertyIfMissing { get; set; }
+        //public bool CompositeToSimple { get; set; }
     }
 }

@@ -12,15 +12,21 @@ namespace PutridParrot.JsonUtilities
         /// Clone the supplied properties from the source 
         /// onto a new object
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static JObject Clone(this JObject source, params string[] properties)
+        public static JObject Clone(this JObject jo, params string[] properties)
         {
             var result = new JObject();
+
+            if (properties == null || properties.Length == 0)
+            {
+                properties = jo.GetProperties().Select(p => p.Key).ToArray();
+            }
+
             foreach (var property in properties)
             {
-                if (source.TryGetToken(property, out var token))
+                if (jo.TryGetToken(property, out var token))
                 {
                     var flattened = FlattenPath(property);
                     if (!result.TryGetToken(flattened, out _))
@@ -29,6 +35,7 @@ namespace PutridParrot.JsonUtilities
                     }
                 }
             }
+
             return result;
         }
 
@@ -39,13 +46,18 @@ namespace PutridParrot.JsonUtilities
         /// <returns></returns>
         public static string RemovePathPrefix(string propertyName)
         {
-            var normalised = propertyName;
-            if (normalised.StartsWith("$."))
+            if (propertyName == null)
             {
-                normalised = normalised.Substring(2);
+                return null;
             }
 
-            return normalised;
+            var normalized = propertyName;
+            if (normalized.StartsWith("$."))
+            {
+                normalized = normalized.Substring(2);
+            }
+
+            return normalized;
         }
 
         /// <summary>
@@ -54,24 +66,34 @@ namespace PutridParrot.JsonUtilities
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public static bool IsCompositePath(string propertyName)
+        private static bool IsCompositePath(string propertyName)
         {
-            var normalised = RemovePathPrefix(propertyName);
-            return normalised.Contains('.');
+            if (propertyName == null)
+            {
+                return false;
+            }
+
+            var normalized = RemovePathPrefix(propertyName);
+            return normalized.Contains('.');
         }
 
         /// <summary>
         /// Takes a propertyName which may contain .
-        /// notation and creates a new name witout the
+        /// notation and creates a new name without the
         /// .
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
         public static string FlattenPath(string propertyName)
         {
-            var normalised = RemovePathPrefix(propertyName);
+            if (propertyName == null)
+            {
+                return null;
+            }
 
-            var split = normalised.Split('.');
+            var normalized = RemovePathPrefix(propertyName);
+
+            var split = normalized.Split('.');
             if (split.Length > 1)
             {
                 var sb = new StringBuilder(split[0]);
@@ -83,7 +105,7 @@ namespace PutridParrot.JsonUtilities
                 return sb.ToString();
             }
 
-            return normalised;
+            return normalized;
         }
 
         private static string MakeFirstCharUppercase(string propertyName)
@@ -94,12 +116,12 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Get's all the top level properties on an JObject
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <returns></returns>
-        public static IList<KeyValuePair<string, object>> GetProperties(this JObject source)
+        public static IList<KeyValuePair<string, object>> GetProperties(this JObject jo)
         {
             var properties = new List<KeyValuePair<string, object>>();
-            var keyValues = source.ToObject<Dictionary<string, object>>();
+            var keyValues = jo.ToObject<Dictionary<string, object>>();
             if (keyValues != null)
             {
                 foreach (var kv in keyValues)
@@ -114,26 +136,26 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Checks if a property exists
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public static bool Exists(this JObject source, string propertyName)
+        public static bool Exists(this JObject jo, string propertyName)
         {
-            return source.TryGetToken(propertyName, out var _);
+            return jo.TryGetToken(propertyName, out var _);
         }
 
         /// <summary>
         /// Try to get the value for the supplied propertyName
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static bool TryGetValue<T>(this JObject source, string propertyName, out T result)
+        public static bool TryGetValue<T>(this JObject jo, string propertyName, out T result)
         {
             result = default;
-            var token = source.SelectToken(propertyName);
+            var token = jo.SelectToken(propertyName);
             if (token != null)
             {
                 result = token.Value<T>();
@@ -143,82 +165,82 @@ namespace PutridParrot.JsonUtilities
             return false;
         }
 
-        /// <summary>
-        /// Try to get the value for the supplied propertyName
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static bool TryGetValue<T>(this JToken source, string propertyName, out T result)
-        {
-            result = default;
-            var token = source.SelectToken(propertyName);
-            if (token != null)
-            {
-                result = token.Value<T>();
-                return true;
-            }
+        ///// <summary>
+        ///// Try to get the value for the supplied propertyName
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="jo"></param>
+        ///// <param name="propertyName"></param>
+        ///// <param name="result"></param>
+        ///// <returns></returns>
+        //public static bool TryGetValue<T>(this JToken jo, string propertyName, out T result)
+        //{
+        //    result = default;
+        //    var token = jo.SelectToken(propertyName);
+        //    if (token != null)
+        //    {
+        //        result = token.Value<T>();
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         /// <summary>
         /// Try to get the value for the supplied propertyName as 
         /// a JToken
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static bool TryGetToken(this JObject source, string propertyName, out JToken token)
+        public static bool TryGetToken(this JObject jo, string propertyName, out JToken token)
         {
-            token = source.SelectToken(propertyName);
+            token = jo.SelectToken(propertyName);
             return token != null;
         }
 
         /// <summary>
         /// Try to add or update a property
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static bool TryAddOrUpdate(this JObject source, string propertyName, JToken token)
+        public static bool TryAddOrUpdate(this JObject jo, string propertyName, JToken token)
         {
-            var normalised = RemovePathPrefix(propertyName);
-            if (source.TryGetToken(normalised, out var _))
+            var normalized = RemovePathPrefix(propertyName);
+            if (jo.TryGetToken(normalized, out _))
             {
-                source.Remove(normalised);
+                jo.Remove(normalized);
             }
-            return source.TryAdd(normalised, token);
+            return jo.TryAdd(normalized, token);
         }
 
         /// <summary>
         /// Try to add or update a property on the source. 
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="property"></param>
         /// <returns></returns>
-        public static bool TryAddOrUpdate(this JObject source, JProperty property)
+        public static bool TryAddOrUpdate(this JObject jo, JProperty property)
         {
-            var normalised = RemovePathPrefix(property.Name);
-            if (source.TryGetToken(normalised, out var _))
+            var normalized = RemovePathPrefix(property.Name);
+            if (jo.TryGetToken(normalized, out var _))
             {
-                source.Remove(normalised);
+                jo.Remove(normalized);
             }
-            return source.TryAdd(normalised, property.Value);
+            return jo.TryAdd(normalized, property.Value);
         }
 
-
         /// <summary>
-        /// Creates a comma separated string of all requested properties
+        /// Creates a comma separated string of all requested properties,
+        /// this is aimed at just documenting values not creating pure CSV
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static string ToString(this JObject source, params string[] properties)
+        public static string ToCsv(this JObject jo, params string[] properties)
         {
             var sb = new StringBuilder();
 
@@ -227,7 +249,7 @@ namespace PutridParrot.JsonUtilities
                 for(var i = 0; i < properties.Length; i++)
                 {
                     var property = properties[i];
-                    if(source.TryGetValue(property, out string value))
+                    if(jo.TryGetValue(property, out string value))
                     {
                         sb.Append($"{property}:{value}");
                         if(i < properties.Length - 1)
@@ -246,47 +268,47 @@ namespace PutridParrot.JsonUtilities
         /// with the value argument
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="value"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static JObject AddOrUpdate<T>(this JObject source, string propertyName, T value, JsonMapSettings settings = null)
+        public static JObject AddOrUpdate<T>(this JObject jo, string propertyName, T value, JsonOptions settings = null)
         {
-            var current = settings ?? JsonMapSettings.Default;
+            var current = settings ?? JsonOptions.Default;
 
-            if (current.CompositeToSimple)
-            {
-                source.TryAddOrUpdate(new JProperty(FlattenPath(propertyName), value));
-            }
-            else
-            {
-                if (!IsCompositePath(propertyName))
-                {
-                    source.TryAddOrUpdate(new JProperty(RemovePathPrefix(propertyName), value));
-                }
-                else
-                {
-                    var normalised = RemovePathPrefix(propertyName);
-                    var split = normalised.Split('.');
-                    //_destination.AddAfterSelf(new );
-                    // this is too simplistic as will only handle data one level in depth
-                    if (split.Length > 0)
-                    {
-                        var next = source;
-                        for (var i = 0; i < split.Length - 1; i++)
-                        {
-                            var tmp = new JObject();
-                            next.Add(new JProperty(split[i], tmp));
-                            next = tmp;
-                        }
+            //if (current.CompositeToSimple)
+            //{
+                jo.TryAddOrUpdate(new JProperty(FlattenPath(propertyName), value));
+        //    }
+        //    else
+        //    {
+        //        if (!IsCompositePath(propertyName))
+        //        {
+        //            source.TryAddOrUpdate(new JProperty(RemovePathPrefix(propertyName), value));
+        //        }
+        //        else
+        //        {
+        //            var normalised = RemovePathPrefix(propertyName);
+        //            var split = normalised.Split('.');
+        //            //_destination.AddAfterSelf(new );
+        //            // this is too simplistic as will only handle data one level in depth
+        //            if (split.Length > 0)
+        //            {
+        //                var next = source;
+        //                for (var i = 0; i < split.Length - 1; i++)
+        //                {
+        //                    var tmp = new JObject();
+        //                    next.Add(new JProperty(split[i], tmp));
+        //                    next = tmp;
+        //                }
 
-                        next.Add(new JProperty(split[split.Length - 1], value));
-                    }
-                }
-            }
+        //                next.Add(new JProperty(split[split.Length - 1], value));
+        //            }
+        //        }
+        //    }
 
-            return source;
+            return jo;
         }
 
         /// <summary>
@@ -294,201 +316,224 @@ namespace PutridParrot.JsonUtilities
         /// the supplied function
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sourcePath"></param>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
         /// <param name="function"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static JObject AddOrUpdate<T>(this JObject source, string sourcePath, Func<JObject, T> function, JsonMapSettings settings = null)
+        public static JObject AddOrUpdate<T>(this JObject jo, string propertyName, Func<JObject, T> function, JsonOptions settings = null)
         {
-            return source.AddOrUpdate(sourcePath, function(source), settings);
+            return jo.AddOrUpdate(propertyName, function(jo), settings);
         }
 
         /// <summary>
         /// Map the source property to the destination property
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
         /// <param name="sourcePath"></param>
-        /// <param name="destinationPath"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static JObject Map(this JObject source, string sourcePath, string destinationPath, JsonMapSettings settings = null)
+        public static JObject Map(this JObject jo, string propertyName, string sourcePath, JsonOptions settings = null)
         {
-            return source.Map(sourcePath, source, destinationPath, settings);
+            return jo.Map(propertyName, jo, sourcePath, settings);
         }
 
         /// <summary>
         /// Map the source property onto the destination object with the same property name
         /// </summary>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
         /// <param name="source"></param>
-        /// <param name="sourcePath"></param>
-        /// <param name="destination"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static JObject Map(this JObject source, string sourcePath, JObject destination, JsonMapSettings settings = null)
+        public static JObject Map(this JObject jo, string propertyName, JObject source, JsonOptions settings = null)
         {
-            return source.Map(sourcePath, destination, sourcePath, settings);
+            return jo.Map(propertyName, source, propertyName, settings);
         }
 
         /// <summary>
         /// Map the source property from the source object to the destination property
         /// on the destination object
         /// </summary>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
         /// <param name="source"></param>
         /// <param name="sourcePath"></param>
-        /// <param name="destination"></param>
-        /// <param name="destinationPath"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static JObject Map(this JObject source, string sourcePath, JObject destination, string destinationPath, JsonMapSettings settings = null)
+        public static JObject Map(this JObject jo, string propertyName, JObject source, string sourcePath, JsonOptions settings = null)
         {
-            var current = settings ?? JsonMapSettings.Default;
+            var current = settings ?? JsonOptions.Default;
 
             if (source.TryGetToken(sourcePath, out var token))
             {
-                if (current.CompositeToSimple)
+                if (!IsCompositePath(propertyName))
                 {
-                    destination.TryAddOrUpdate(FlattenPath(destinationPath), token);
+                    jo.TryAddOrUpdate(RemovePathPrefix(propertyName), token);
                 }
                 else
                 {
-                    if (!IsCompositePath(destinationPath))
+                    var normalized = RemovePathPrefix(propertyName);
+                    var split = normalized.Split('.');
+                    //_destination.AddAfterSelf(new );
+                    // this is too simplistic as will only handle data one level in depth
+                    if (split.Length > 0)
                     {
-                        destination.TryAddOrUpdate(RemovePathPrefix(destinationPath), token);
-                    }
-                    else
-                    {
-                        var normalised = RemovePathPrefix(destinationPath);
-                        var split = normalised.Split('.');
-                        //_destination.AddAfterSelf(new );
-                        // this is too simplistic as will only handle data one level in depth
-                        if (split.Length > 0)
+                        var next = jo;
+                        for (var i = 0; i < split.Length - 1; i++)
                         {
-                            var next = destination;
-                            for (var i = 0; i < split.Length - 1; i++)
-                            {
-                                var tmp = new JObject();
-                                next.TryAddOrUpdate(split[i], tmp);
-                                next = tmp;
-                            }
-
-                            next.TryAddOrUpdate(split[split.Length - 1], token);
+                            var tmp = new JObject();
+                            next.TryAddOrUpdate(split[i], tmp);
+                            next = tmp;
                         }
+
+                        next.TryAddOrUpdate(split[split.Length - 1], token);
                     }
                 }
             }
-            else if (current.AddPathIfMissing)
+            else if (current.AddPropertyIfMissing)
             {
-                if (current.CompositeToSimple)
-                {
-                    destination.TryAddOrUpdate(FlattenPath(destinationPath), null);
-                }
+                jo.TryAddOrUpdate(FlattenPath(propertyName), null);
             }
 
-            return source;
+            return jo;
         }
 
         /// <summary>
         /// If the predicate is true then execute the block of code
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="predicate"></param>
         /// <param name="block"></param>
         /// <returns></returns>
-        public static JObject If(this JObject source, Func<bool> predicate, Action<JObject> block)
+        public static JObject If(this JObject jo, Func<bool> predicate, Action<JObject> block)
         {
             if(predicate())
             {
-                block(source);
+                block(jo);
             }
-            return source;
+            return jo;
         }
 
         /// <summary>
         /// If the predicate is true then execute the block of code
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="predicate"></param>
         /// <param name="block"></param>
         /// <returns></returns>
-        public static JObject If(this JObject source, Func<JObject, bool> predicate, Action<JObject> block)
+        public static JObject If(this JObject jo, Func<JObject, bool> predicate, Action<JObject> block)
         {
-            if (predicate(source))
+            if (predicate(jo))
             {
-                block(source);
+                block(jo);
             }
-            return source;
+            return jo;
         }
 
 
         /// <summary>
         /// If the property exists then execute the block of code
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="block"></param>
         /// <returns></returns>
-        public static JObject IfExists(this JObject source, string propertyName, Action<JObject> block)
+        public static JObject IfExists(this JObject jo, string propertyName, Action<JObject> block)
         {
-            return source.If(() => source.Exists(propertyName), block);
+            return jo.If(() => jo.Exists(propertyName), block);
         }
 
         /// <summary>
         /// If the property does not exist then execute the block of code
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="block"></param>
         /// <returns></returns>
-        public static JObject IfNotExists(this JObject source, string propertyName, Action<JObject> block)
+        public static JObject IfNotExists(this JObject jo, string propertyName, Action<JObject> block)
         {
-            return source.If(() => !source.Exists(propertyName), block);
+            return jo.If(() => !jo.Exists(propertyName), block);
         }
 
         /// <summary>
         /// Removes a selection of properties
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static JObject Remove(this JObject source, IEnumerable<string> properties)
+        public static JObject Remove(this JObject jo, IEnumerable<string> properties)
         {
             foreach(var property in properties)
             {
-                source.Remove(property);
+                jo.Remove(property);
             }
 
-            return source;
+            return jo;
         }
 
         /// <summary>
-        /// Mutates a property
+        /// Updates a property with the new value
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="newValue"></param>
+        /// <returns></returns>
+        public static JObject Update<T>(this JObject jo, string propertyName, T newValue)
+        {
+            return jo.Update<T, T>(propertyName, oldValue => newValue);
+        }
+
+        public static JObject Update<T, TNew>(this JObject jo, string propertyName, TNew newValue)
+        {
+            return jo.Update<T, TNew>(propertyName, oldValue => newValue);
+        }
+
+        /// <summary>
+        /// Updates a property using a function
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="mutation"></param>
         /// <returns></returns>
-        public static JObject Mutate<T>(this JObject source, string propertyName, Func<T, T> mutation)
+        public static JObject Update<T>(this JObject jo, string propertyName, Func<T, T> mutation)
         {
-            return source.Mutate<T, T>(propertyName, mutation);
+            return jo.Update<T, T>(propertyName, mutation);
         }
 
         /// <summary>
-        /// Mutates a property and can change types
+        /// Updates a property using a function and can change types
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="source"></param>
+        /// <param name="jo"></param>
         /// <param name="propertyName"></param>
         /// <param name="mutation"></param>
         /// <returns></returns>
-        public static JObject Mutate<T, TResult>(this JObject source, string propertyName, Func<T, TResult> mutation)
+        public static JObject Update<T, TResult>(this JObject jo, string propertyName, Func<T, TResult> mutation)
         {
-            if(source.TryGetValue<T>(propertyName, out T value))
+            if(jo.TryGetValue<T>(propertyName, out T value))
             {
-                source.AddOrUpdate(propertyName, mutation(value));
+                jo.AddOrUpdate(propertyName, mutation(value));
             }
-            return source;
+            return jo;
+        }
+
+        /// <summary>
+        /// Gets a value using the supplied propertyName, if the value
+        /// doesn't exist, returns a default(T) - this is basically
+        /// a less verbose SelectToken method.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static T Get<T>(this JObject jo, string propertyName)
+        {
+            return jo.TryGetToken(propertyName, out var value) ? value.Value<T>() : default(T);
         }
     }
 }
