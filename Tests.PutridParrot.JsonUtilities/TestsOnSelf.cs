@@ -359,5 +359,38 @@ namespace Tests.PutridParrot.JsonUtilities
             Assert.AreEqual("File", mapped.Get<string>("newObject.value"));
             Assert.AreEqual(123, mapped.Get<int>("additionalProperty"));
         }
+
+        [Test]
+        public void IsArray_FromProperty_WhenNotArray_ExpectFalse()
+        {
+            var json = JObject.Parse(Sample.MenuData);
+
+            Assert.IsFalse(json.IsArray("menu.popup"));
+        }
+
+        [Test]
+        public void IsArray_FromProperty_WhenIsArray_ExpectTrue()
+        {
+            var json = JObject.Parse(Sample.MenuData);
+
+            Assert.IsTrue(json.IsArray("menu.popup.menuitem"));
+        }
+
+        [Test]
+        public void IsArray_WhenNotArray_ExpectFalse()
+        {
+            var json = JObject.Parse(Sample.MenuData);
+
+            Assert.IsFalse(json.SelectToken("menu.popup").IsArray());
+        }
+
+        [Test]
+        public void IsArray_WhenIsArray_ExpectTrue()
+        {
+            var json = JObject.Parse(Sample.MenuData);
+
+            Assert.IsTrue(json.SelectToken("menu.popup.menuitem").IsArray());
+        }
+
     }
 }

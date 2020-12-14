@@ -535,5 +535,37 @@ namespace PutridParrot.JsonUtilities
         {
             return jo.TryGetToken(propertyName, out var value) ? value.Value<T>() : default(T);
         }
+
+        /// <summary>
+        /// Checks if the JObject represents an array or not
+        /// </summary>
+        /// <param name="jo"></param>
+        /// <returns></returns>
+        public static bool IsArray(this JObject jo)
+        {
+            return jo.Type == JTokenType.Array;
+        }
+
+        /// <summary>
+        /// Checks if the JToken represents an array
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static bool IsArray(this JToken token)
+        {
+            return token.Type == JTokenType.Array;
+        }
+
+        /// <summary>
+        /// Checks if the property on the JObject represents
+        /// and array
+        /// </summary>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static bool IsArray(this JObject jo, string propertyName)
+        {
+            return jo.SelectToken(propertyName)?.Type == JTokenType.Array;
+        }
     }
 }
