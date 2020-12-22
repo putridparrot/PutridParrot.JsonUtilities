@@ -12,9 +12,9 @@ namespace PutridParrot.JsonUtilities
         /// Clone the supplied properties from the source 
         /// onto a new object
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="properties"></param>
-        /// <returns></returns>
+        /// <param name="jo">The object to clone</param>
+        /// <param name="properties">An array of strings representing the properties to clone</param>
+        /// <returns>A new object with properties and values from the source object</returns>
         public static JObject Clone(this JObject jo, params string[] properties)
         {
             var result = new JObject();
@@ -42,9 +42,9 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Removes the path prefix
         /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public static string RemovePathPrefix(string propertyName)
+        /// <param name="propertyName">The property name to have it's prefix removed</param>
+        /// <returns>The un-prefixed property name</returns>
+        private static string RemovePathPrefix(string propertyName)
         {
             if (propertyName == null)
             {
@@ -64,8 +64,8 @@ namespace PutridParrot.JsonUtilities
         /// Checks if the propertyName is a composite, i.e.
         /// uses object . notation
         /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
+        /// <param name="propertyName">The property to check</param>
+        /// <returns>True if the property has dot notation else false</returns>
         private static bool IsCompositePath(string propertyName)
         {
             if (propertyName == null)
@@ -82,8 +82,8 @@ namespace PutridParrot.JsonUtilities
         /// notation and creates a new name without the
         /// .
         /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
+        /// <param name="propertyName">The property name to flatten</param>
+        /// <returns>The flattened property name</returns>
         public static string FlattenPath(string propertyName)
         {
             if (propertyName == null)
@@ -116,8 +116,8 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Get's all the top level properties on an JObject
         /// </summary>
-        /// <param name="jo"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <returns>A list of the properties in a key value pairs</returns>
         public static IList<KeyValuePair<string, object>> GetProperties(this JObject jo)
         {
             var properties = new List<KeyValuePair<string, object>>();
@@ -136,22 +136,22 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Checks if a property exists
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property name to check for</param>
+        /// <returns>True if the property exists, else false</returns>
         public static bool Exists(this JObject jo, string propertyName)
         {
-            return jo.TryGetToken(propertyName, out var _);
+            return jo.TryGetToken(propertyName, out _);
         }
 
         /// <summary>
         /// Try to get the value for the supplied propertyName
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to try and get the value for</param>
+        /// <param name="result">Either the value for the property of a default(T)</param>
+        /// <returns>True if the property exists, else false</returns>
         public static bool TryGetValue<T>(this JObject jo, string propertyName, out T result)
         {
             result = default;
@@ -190,10 +190,10 @@ namespace PutridParrot.JsonUtilities
         /// Try to get the value for the supplied propertyName as 
         /// a JToken
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property name of the token to try and get</param>
+        /// <param name="token">The token if present else null</param>
+        /// <returns>True if the property exists, else false</returns>
         public static bool TryGetToken(this JObject jo, string propertyName, out JToken token)
         {
             token = jo.SelectToken(propertyName);
@@ -203,10 +203,10 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Try to add or update a property
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to add or update</param>
+        /// <param name="token">The token to be added/updated</param>
+        /// <returns>True if successful, else false</returns>
         public static bool TryAddOrUpdate(this JObject jo, string propertyName, JToken token)
         {
             var normalized = RemovePathPrefix(propertyName);
@@ -220,9 +220,9 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Try to add or update a property on the source. 
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="property"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="property">The property to add or update</param>
+        /// <returns>True if successful, else false</returns>
         public static bool TryAddOrUpdate(this JObject jo, JProperty property)
         {
             var normalized = RemovePathPrefix(property.Name);
@@ -237,9 +237,9 @@ namespace PutridParrot.JsonUtilities
         /// Creates a comma separated string of all requested properties,
         /// this is aimed at just documenting values not creating pure CSV
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="properties"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="properties">The properties that should be converted to CSV</param>
+        /// <returns>A string representing the CSV of the properties from the source object</returns>
         public static string ToCsv(this JObject jo, params string[] properties)
         {
             var sb = new StringBuilder();
@@ -268,11 +268,11 @@ namespace PutridParrot.JsonUtilities
         /// with the value argument
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to add or update</param>
+        /// <param name="value">The value to be added/updated</param>
         /// <param name="settings"></param>
-        /// <returns></returns>
+        /// <returns>The source object</returns>
         public static JObject AddOrUpdate<T>(this JObject jo, string propertyName, T value, JsonOptions settings = null)
         {
             var current = settings ?? JsonOptions.Default;
@@ -316,11 +316,11 @@ namespace PutridParrot.JsonUtilities
         /// the supplied function
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="function"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property name to add or update</param>
+        /// <param name="function">The function to use to get the value to add/update</param>
+        /// <param name="settings">Settings/options to use to add/update</param>
+        /// <returns>The source object</returns>
         public static JObject AddOrUpdate<T>(this JObject jo, string propertyName, Func<JObject, T> function, JsonOptions settings = null)
         {
             return jo.AddOrUpdate(propertyName, function(jo), settings);
@@ -329,11 +329,11 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Map the source property to the destination property
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="sourcePath"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property name to map data to</param>
+        /// <param name="sourcePath">The source path</param>
+        /// <param name="settings">Settings/options to be used in the Map method</param>
+        /// <returns>The source object</returns>
         public static JObject Map(this JObject jo, string propertyName, string sourcePath, JsonOptions settings = null)
         {
             return jo.Map(propertyName, jo, sourcePath, settings);
@@ -342,11 +342,11 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Map the source property onto the destination object with the same property name
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="source"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
+        /// <param name="jo">The destination object</param>
+        /// <param name="propertyName">The property name to map to</param>
+        /// <param name="source">The object to be mapped to the property name</param>
+        /// <param name="settings">Settings/options to be used in the Map method</param>
+        /// <returns>The destination object</returns>
         public static JObject Map(this JObject jo, string propertyName, JObject source, JsonOptions settings = null)
         {
             return jo.Map(propertyName, source, propertyName, settings);
@@ -356,12 +356,12 @@ namespace PutridParrot.JsonUtilities
         /// Map the source property from the source object to the destination property
         /// on the destination object
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="source"></param>
-        /// <param name="sourcePath"></param>
+        /// <param name="jo">The destination object</param>
+        /// <param name="propertyName">The property name to map to</param>
+        /// <param name="source">The source object to use to get a value from</param>
+        /// <param name="sourcePath">The source property name </param>
         /// <param name="settings"></param>
-        /// <returns></returns>
+        /// <returns>The destination object</returns>
         public static JObject Map(this JObject jo, string propertyName, JObject source, string sourcePath, JsonOptions settings = null)
         {
             var current = settings ?? JsonOptions.Default;
@@ -403,10 +403,10 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// If the predicate is true then execute the block of code
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="predicate"></param>
-        /// <param name="block"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="predicate">If the predicate is true execute the block</param>
+        /// <param name="block">The block of actions to execute if true</param>
+        /// <returns>The source object</returns>
         public static JObject If(this JObject jo, Func<bool> predicate, Action<JObject> block)
         {
             if(predicate())
@@ -419,10 +419,10 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// If the predicate is true then execute the block of code
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="predicate"></param>
-        /// <param name="block"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="predicate">If the predicate is true execute the block</param>
+        /// <param name="block">The block of actions to execute if true</param>
+        /// <returns>The source object</returns>
         public static JObject If(this JObject jo, Func<JObject, bool> predicate, Action<JObject> block)
         {
             if (predicate(jo))
@@ -436,10 +436,10 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// If the property exists then execute the block of code
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="block"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">If this property exists then execute the block</param>
+        /// <param name="block">The block of actions to execute if true</param>
+        /// <returns>The source object</returns>
         public static JObject IfExists(this JObject jo, string propertyName, Action<JObject> block)
         {
             return jo.If(() => jo.Exists(propertyName), block);
@@ -448,10 +448,10 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// If the property does not exist then execute the block of code
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="block"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">If this property does not exist then execute the block</param>
+        /// <param name="block">The block of actions to execute if true</param>
+        /// <returns>The source object</returns>
         public static JObject IfNotExists(this JObject jo, string propertyName, Action<JObject> block)
         {
             return jo.If(() => !jo.Exists(propertyName), block);
@@ -460,9 +460,9 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Removes a selection of properties
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="properties"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="properties">The properties to remove</param>
+        /// <returns>The source object</returns>
         public static JObject Remove(this JObject jo, IEnumerable<string> properties)
         {
             foreach(var property in properties)
@@ -477,15 +477,24 @@ namespace PutridParrot.JsonUtilities
         /// Updates a property with the new value
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="newValue"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to update</param>
+        /// <param name="newValue">The value to apply</param>
+        /// <returns>The source object</returns>
         public static JObject Update<T>(this JObject jo, string propertyName, T newValue)
         {
             return jo.Update<T, T>(propertyName, oldValue => newValue);
         }
 
+        /// <summary>
+        /// Updates a property with the new value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TNew"></typeparam>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to update</param>
+        /// <param name="newValue">The value to apply</param>
+        /// <returns>The source object</returns>
         public static JObject Update<T, TNew>(this JObject jo, string propertyName, TNew newValue)
         {
             return jo.Update<T, TNew>(propertyName, oldValue => newValue);
@@ -495,10 +504,10 @@ namespace PutridParrot.JsonUtilities
         /// Updates a property using a function
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="mutation"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to update</param>
+        /// <param name="mutation">A mutation function which takes the current value and then sets the new value</param>
+        /// <returns>The source object</returns>
         public static JObject Update<T>(this JObject jo, string propertyName, Func<T, T> mutation)
         {
             return jo.Update<T, T>(propertyName, mutation);
@@ -509,10 +518,10 @@ namespace PutridParrot.JsonUtilities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TResult"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="mutation"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to update</param>
+        /// <param name="mutation">A mutation function which takes the current value and then sets the new value</param>
+        /// <returns>The source object</returns>
         public static JObject Update<T, TResult>(this JObject jo, string propertyName, Func<T, TResult> mutation)
         {
             if(jo.TryGetValue<T>(propertyName, out T value))
@@ -528,9 +537,9 @@ namespace PutridParrot.JsonUtilities
         /// a less verbose SelectToken method.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property to get, default(T) is returned if the property does not exist</param>
+        /// <returns>The source object</returns>
         public static T Get<T>(this JObject jo, string propertyName)
         {
             return jo.TryGetToken(propertyName, out var value) ? value.Value<T>() : default(T);
@@ -539,8 +548,8 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Checks if the JObject represents an array or not
         /// </summary>
-        /// <param name="jo"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <returns>True if the source object is an array, else false</returns>
         public static bool IsArray(this JObject jo)
         {
             return jo.Type == JTokenType.Array;
@@ -549,8 +558,8 @@ namespace PutridParrot.JsonUtilities
         /// <summary>
         /// Checks if the JToken represents an array
         /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="token">The source token</param>
+        /// <returns>True if the source object is an array, else false</returns>
         public static bool IsArray(this JToken token)
         {
             return token.Type == JTokenType.Array;
@@ -560,9 +569,9 @@ namespace PutridParrot.JsonUtilities
         /// Checks if the property on the JObject represents
         /// and array
         /// </summary>
-        /// <param name="jo"></param>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
+        /// <param name="jo">The source object</param>
+        /// <param name="propertyName">The property name to check</param>
+        /// <returns>True if the property is an array, else false</returns>
         public static bool IsArray(this JObject jo, string propertyName)
         {
             return jo.SelectToken(propertyName)?.Type == JTokenType.Array;

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tests.PutridParrot.JsonUtilities
+﻿namespace Tests.PutridParrot.JsonUtilities
 {
     public static class Sample
     {
+        /// <summary>
+        /// Simple sample of a potential menu data source
+        /// </summary>
         public const string MenuData = "{\"menu\": {" +
             "\"id\": \"file\"," +
             "\"value\": \"File\"," +
