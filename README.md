@@ -24,7 +24,25 @@ var mapped = new JObject()
     .AddOrUpdate("additionalProperty", 123);
 ```
 
-In this example the _mapped_ JSON would look like this
+In this example, assuming you had the following Sample.MenuData 
+
+```CSharp
+public const string MenuData = "{\"menu\": {" +
+    "\"id\": \"file\"," +
+    "\"value\": \"File\"," +
+    "\"popup\": {" +
+      "\"menuitem\": [" +
+        "{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"}," +
+        "{\"value\": \"Open\", \"onclick\": \"OpenDoc()\"}," +
+        "{\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}" +
+      "]" +
+    "}" +
+  "}," +
+  "\"id\": \"Menu1\"" + 
+"}";
+```
+
+then the _mapped_ JSON would look like this
 
 ```json
 {
