@@ -434,7 +434,8 @@ namespace PutridParrot.JsonUtilities
 
 
         /// <summary>
-        /// If the property exists then execute the block of code
+        /// If the property exists then execute the block of code passing
+        /// just the original object
         /// </summary>
         /// <param name="jo">The source object</param>
         /// <param name="propertyName">If this property exists then execute the block</param>
@@ -443,6 +444,24 @@ namespace PutridParrot.JsonUtilities
         public static JObject IfExists(this JObject jo, string propertyName, Action<JObject> block)
         {
             return jo.If(() => jo.Exists(propertyName), block);
+        }
+
+        /// <summary>
+        /// If the property exists then execute the block of code passing
+        /// both the original object and the property
+        /// </summary>
+        /// <param name="jo"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
+        public static JObject IfExists(this JObject jo, string propertyName, Action<JObject, JToken> block)
+        {
+            if(jo.TryGetToken(propertyName, out var token))
+            {
+                block(jo, token);
+            }
+
+            return jo;
         }
 
         /// <summary>

@@ -175,6 +175,19 @@ namespace Tests.PutridParrot.JsonUtilities
             Assert.IsFalse(json.Exists("newProperty"));
         }
 
+        [Test, Description("IfExists property exists then execute block with token")]
+        public void IfExists_IfPropertyExists_TheExecuteBlockWithToken()
+        {
+            var json = JObject.Parse(Sample.MenuData);
+
+            JToken token = null;
+            json.IfExists("id", (j, tok) => { token = tok; });
+
+          
+            Assert.AreEqual("Menu1", token?.Value<string>());
+        }
+
+
         [Test, Description("IfNotExists property exists then execute block")]
         public void IfNotExists_IfPropertyExists_TheExecuteBlock()
         {
