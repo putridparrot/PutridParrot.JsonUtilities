@@ -6,7 +6,7 @@ JSON C# utility classes, currently only targeting Newtonsoft.Json.
 
 ## JsonExtensions
 
-The JsonExtensions class supplies methods for checkibg for data in a JObject as well as mutating the data, including the ability to map data within a JObject or from another JObject.
+The JsonExtensions class supplies methods for checking for data in a JObject as well as mutating the data, including the ability to map data within a JObject or from another JObject.
 
 _Note: Methods work in a right to left manner (where appropriate) similar to if you were assigning values._
 
